@@ -223,7 +223,7 @@ configure_autostart() {
     cat > "$AUTOSTART_DIR/workspaces.desktop" << EOF
 [Desktop Entry]
 Type=Application
-Exec=/opt/workspacesclient/workspacesclient
+Exec=/usr/bin/workspacesclient
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true
@@ -330,8 +330,8 @@ Version=1.0
 Type=Application
 Name=AWS WorkSpaces
 Comment=Connect to AWS WorkSpaces
-Exec=/opt/workspacesclient/workspacesclient
-Icon=/opt/workspacesclient/resources/app.asar.unpacked/build/icons/64x64.png
+Exec=/usr/bin/workspacesclient
+Icon=workspacesclient
 Terminal=false
 Categories=Network;RemoteAccess;
 EOF
