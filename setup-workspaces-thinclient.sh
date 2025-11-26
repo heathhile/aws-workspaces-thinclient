@@ -22,7 +22,6 @@ NC='\033[0m' # No Color
 
 # Configuration
 THINCLIENT_USER="workspaces"
-WORKSPACES_URL="https://d2td7dqidlhjx7.cloudfront.net/prod/iad/linux/x86_64/WorkSpaces_ubuntu_latest_x86_64.deb"
 AUTO_LOGIN=true
 LOCK_DOWN_SYSTEM=true
 
@@ -121,18 +120,32 @@ create_user() {
 install_workspaces_client() {
     print_header "Installing AWS WorkSpaces Client"
 
-    cd /tmp
+    # Detect Ubuntu version for appropriate repository
+    UBUNTU_VERSION=$(lsb_release -cs)
 
-    # Download WorkSpaces client
-    print_status "Downloading WorkSpaces client..."
-    wget -O workspaces.deb "$WORKSPACES_URL"
+    # Map Ubuntu 24.04 (noble) to 22.04 (jammy) since AWS doesn't have noble repo yet
+    if [ "$UBUNTU_VERSION" = "noble" ]; then
+        UBUNTU_VERSION="jammy"
+        print_warning "Ubuntu 24.04 detected, using Ubuntu 22.04 (jammy) repository"
+    fi
 
-    # Install the client
+    # Add AWS WorkSpaces repository key
+    print_status "Adding AWS WorkSpaces repository key..."
+    wget -q -O - https://workspaces-client-linux-public-key.s3-us-west-2.amazonaws.com/ADB332E7.asc | \
+        tee /etc/apt/trusted.gpg.d/amazon-workspaces-clients.asc > /dev/null
+
+    # Add AWS WorkSpaces repository
+    print_status "Adding AWS WorkSpaces repository..."
+    echo "deb [arch=amd64] https://d3nt0h4h6pmmc4.cloudfront.net/ubuntu $UBUNTU_VERSION main" | \
+        tee /etc/apt/sources.list.d/amazon-workspaces-clients.list
+
+    # Update package lists
+    print_status "Updating package lists..."
+    apt update
+
+    # Install WorkSpaces client from repository
     print_status "Installing WorkSpaces client..."
-    apt install -y ./workspaces.deb
-
-    # Clean up
-    rm workspaces.deb
+    apt install -y workspacesclient
 
     print_status "WorkSpaces client installed"
 }
