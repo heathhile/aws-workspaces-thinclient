@@ -1,0 +1,27 @@
+# OS Files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Backup files
+*.backup
+*.bak
+*.old
+
+# Log files
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# IDE/Editor files
+.vscode/
+.idea/
+*.sublime-*
+
+# Test files
+test-*.sh
