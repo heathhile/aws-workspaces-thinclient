@@ -22,6 +22,7 @@ AWS WorkSpaces is available in AWS GovCloud (US) with support for DCV/WSP protoc
 - **Two Deployment Options**:
   - Native WorkSpaces client with full feature support
   - Browser-based kiosk mode (ultra-lightweight)
+- **OpenVPN Pre-Login Support** - Connect to VPN before user login for AWS Managed AD authentication
 - **Security Hardening**:
   - Auto-login with locked-down user permissions
   - Firewall configuration (outbound-only)
@@ -29,6 +30,7 @@ AWS WorkSpaces is available in AWS GovCloud (US) with support for DCV/WSP protoc
   - Automatic security updates
 - **Zero-Touch Operation** - Auto-start WorkSpaces on boot
 - **GovCloud Compatible** - Designed for AWS GovCloud (US) environments
+- **CMMC Compliance Ready** - MFA support, encrypted sessions, audit logging
 
 ## Quick Start
 
@@ -61,6 +63,30 @@ chmod +x setup-browser-kiosk.sh
 # Run as root
 sudo ./setup-browser-kiosk.sh
 ```
+
+### Option 3: Add OpenVPN Pre-Login (AWS Managed AD Integration)
+
+For environments using AWS Managed AD authentication, configure OpenVPN to connect before user login:
+
+```bash
+# First, run Option 1 (native client setup)
+# Then configure OpenVPN for pre-login VPN connection
+
+# Download the OpenVPN setup script
+wget https://raw.githubusercontent.com/YOUR-USERNAME/aws-workspaces-thinclient/main/setup-openvpn-prelogin.sh
+
+# Make it executable
+chmod +x setup-openvpn-prelogin.sh
+
+# Run as root (have your .ovpn file and credentials ready)
+sudo ./setup-openvpn-prelogin.sh
+```
+
+This enables:
+- VPN connection established at boot (before login screen)
+- DNS points to AWS Managed AD domain controllers
+- Users authenticate with AD credentials (DOMAIN\username)
+- Seamless WorkSpaces login with AD credentials
 
 ## Prerequisites
 
@@ -432,6 +458,56 @@ To configure for multiple WorkSpaces environments:
 2. Create separate user accounts for each WorkSpaces environment
 3. Configure each user's autostart independently
 
+### AWS Managed AD Integration with OpenVPN
+
+For organizations using AWS Managed Active Directory:
+
+**Network Flow:**
+1. Thin client boots
+2. OpenVPN connects automatically (before login screen)
+3. DNS configured to point to AWS Managed AD domain controllers
+4. User sees login screen
+5. User enters AD credentials: `DOMAIN\username`
+6. WorkSpaces client launches with authenticated AD session
+
+**Setup Process:**
+```bash
+# 1. Set up thin client
+sudo ./setup-workspaces-thinclient.sh
+
+# 2. Configure OpenVPN for pre-login
+sudo ./setup-openvpn-prelogin.sh
+# You'll need:
+# - OpenVPN .ovpn configuration file
+# - VPN credentials (username/password or certificates)
+# - AWS Managed AD DNS server IPs
+
+# 3. Reboot and test
+sudo reboot
+```
+
+**Check VPN Status:**
+```bash
+# Simple status check
+check-vpn-status
+
+# Detailed service status
+systemctl status openvpn-client@thin-client
+
+# View VPN logs
+journalctl -u openvpn-client@thin-client -f
+
+# Test AD connectivity
+nslookup yourdomain.com
+ping YOUR_AD_DOMAIN_CONTROLLER_IP
+```
+
+**Troubleshooting AD Authentication:**
+- Ensure VPN is connected before login: `check-vpn-status`
+- Verify DNS points to AD domain controllers
+- Test domain controller connectivity from thin client
+- Check WorkSpaces is configured for AD directory in AWS console
+
 ### Monitoring and Logging
 
 **Enable system logging:**
@@ -443,6 +519,12 @@ sudo systemctl enable rsyslog
 **Monitor WorkSpaces client logs:**
 ```bash
 tail -f ~/.workspaces/logs/workspaces_client.log
+```
+
+**Monitor VPN logs:**
+```bash
+tail -f /var/log/syslog | grep ovpn
+journalctl -u openvpn-client@thin-client -f
 ```
 
 ## Updating
