@@ -1,40 +1,76 @@
 # AWS WorkSpaces Thin Client for GovCloud
 
-Convert commodity hardware into a secure, locked-down thin client for AWS WorkSpaces in GovCloud environments. This project provides automated scripts and comprehensive documentation to transform any x86_64 Linux-compatible device into a dedicated WorkSpaces endpoint.
+Convert commodity hardware into a secure, locked-down thin client for AWS WorkSpaces in GovCloud environments. This project provides automated scripts and comprehensive documentation to transform **Windows or Linux** devices into dedicated WorkSpaces endpoints with pre-login VPN and Active Directory integration.
 
 ## Overview
 
 AWS WorkSpaces is available in AWS GovCloud (US) with support for DCV/WSP protocols. However, the Amazon WorkSpaces Thin Client hardware device is **not available in GovCloud regions**. This project solves that problem by enabling you to repurpose existing hardware as thin clients.
 
+### Supported Operating Systems
+
+- **Windows 10/11 Pro or Enterprise** - Recommended for AWS Managed AD integration
+- **Ubuntu 24.04 LTS / 22.04 LTS** - Linux alternative
+
 ### Tested Hardware
 
 - **AWOW AK34 Pro** Mini PC (Intel Celeron J3455, 6-8GB RAM)
-- Any x86_64 system capable of running Ubuntu 22.04 LTS or newer
+- Standard Windows laptops/desktops
+- Any x86_64 system capable of running Windows 10/11 or Ubuntu
 
 ### Supported Protocols
 
 - **DCV/WSP (WorkSpaces Streaming Protocol)** - Recommended for GovCloud
-- **Web Browser Access** - Alternative lightweight option
+- **Web Browser Access** - Alternative lightweight option (Linux only)
 
 ## Features
 
-- **Automated Setup** - Single script installation
-- **Two Deployment Options**:
-  - Native WorkSpaces client with full feature support
-  - Browser-based kiosk mode (ultra-lightweight)
-- **OpenVPN Pre-Login Support** - Connect to VPN before user login for AWS Managed AD authentication
+- **Dual Platform Support** - Windows and Linux deployment options
+- **Automated Setup** - PowerShell and Bash script installation
+- **Pre-Login VPN** - Certificate-based OpenVPN connects before user login
+- **AWS Managed AD Integration** - Native domain join and SSO to WorkSpaces
+- **Group Policy Support** - Centralized management via GPO (Windows)
 - **Security Hardening**:
-  - Auto-login with locked-down user permissions
+  - Certificate-based device authentication
+  - Defense-in-depth authentication (device cert + user MFA)
   - Firewall configuration (outbound-only)
   - Disabled unnecessary services
   - Automatic security updates
 - **Zero-Touch Operation** - Auto-start WorkSpaces on boot
 - **GovCloud Compatible** - Designed for AWS GovCloud (US) environments
-- **CMMC Compliance Ready** - MFA support, encrypted sessions, audit logging
+- **CMMC Level 2 Compliance** - Multi-factor auth, encrypted sessions, audit logging
 
 ## Quick Start
 
-### Option 1: Native WorkSpaces Client (Recommended)
+> **New:** Windows deployment now available with better Active Directory integration and Group Policy support!
+
+### Windows Deployment (Recommended for AWS Managed AD)
+
+For Windows 10/11 Pro or Enterprise with native AD integration:
+
+```powershell
+# Download the PowerShell setup script
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/heathhile/aws-workspaces-thinclient/main/Setup-WindowsThinClient.ps1" -OutFile "Setup-WindowsThinClient.ps1"
+
+# Run with administrator privileges
+.\Setup-WindowsThinClient.ps1
+```
+
+**What it does:**
+- Installs OpenVPN client with auto-connect
+- Configures certificate-based VPN for pre-login authentication
+- Joins Windows to AWS Managed AD domain
+- Installs AWS WorkSpaces client
+- Configures auto-launch and optimizations
+
+**For detailed Windows deployment:**
+- See [WINDOWS-DEPLOYMENT.md](WINDOWS-DEPLOYMENT.md) for complete guide
+- Includes certificate generation, VPN configuration, and GPO templates
+
+---
+
+### Linux Deployment
+
+### Option 1: Native WorkSpaces Client (Ubuntu)
 
 For full feature support including USB redirection, multiple monitors, and optimal performance:
 
